@@ -30,6 +30,8 @@ features = [
   'WebGlProgram',
   'WebGlRenderingContext',
   'WebGlUniformLocation',
+  'WebGlFramebuffer',
+  'WebGlTexture',
   'WebGlShader',
   'Performance'
 ]
