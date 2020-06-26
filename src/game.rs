@@ -5,6 +5,7 @@ use web_sys::window;
 pub struct Game {
     renderer: Renderer,
     last_timestamp: f32,
+    t: f32,
 }
 
 impl Game {
@@ -12,6 +13,7 @@ impl Game {
         Game {
             renderer: Renderer::new(),
             last_timestamp: window().unwrap().performance().unwrap().now() as f32,
+            t: 0.0,
         }
     }
 
@@ -20,7 +22,9 @@ impl Game {
         let dt = new_timestamp - self.last_timestamp;
         self.last_timestamp = new_timestamp;
 
-        self.renderer.draw_frame(dt);
+        self.t += dt;
+
+        self.renderer.draw_frame(self.t);
     }
 
     pub fn send_key_down(&mut self, code: u32) {

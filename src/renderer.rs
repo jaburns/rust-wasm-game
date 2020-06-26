@@ -1,4 +1,3 @@
-use js_sys::Math::random;
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use web_sys::{
@@ -106,8 +105,12 @@ impl TriangleRenderer {
             WebGlRenderingContext::VERTEX_SHADER,
             r#"
             attribute vec4 position;
+            uniform float u_time;
             void main() {
-                gl_Position = position;
+                vec4 pos = position;
+                pos.y += 0.25;
+                pos.xy *= mat2(cos(u_time/971.), sin(u_time/971.), -sin(u_time/971.), cos(u_time/971.));
+                gl_Position = pos;
             }
         "#,
         )
@@ -118,9 +121,9 @@ impl TriangleRenderer {
             WebGlRenderingContext::FRAGMENT_SHADER,
             r#"
             precision highp float;
-            uniform vec3 u_color;
+            uniform float u_time;
             void main() {
-                gl_FragColor = vec4(u_color, 1.0);
+                gl_FragColor = vec4(vec2(.7,.7) + vec2(.2,.2)*sin(u_time/100.), 0,1);
             }
         "#,
         )
@@ -152,18 +155,13 @@ impl TriangleRenderer {
         }
     }
 
-    pub fn draw_frame(&mut self) {
+    pub fn draw_frame(&mut self, t: f32) {
         let gl = &self.gl;
 
         gl.use_program(Some(&self.program));
         gl.bind_buffer(WebGlRenderingContext::ARRAY_BUFFER, Some(&self.buffer));
 
-        gl.uniform3f(
-            gl.get_uniform_location(&self.program, "u_color").as_ref(),
-            random() as f32,
-            random() as f32,
-            random() as f32,
-        );
+        gl.uniform1f(gl.get_uniform_location(&self.program, "u_time").as_ref(), t);
 
         gl.enable_vertex_attrib_array(0);
         gl.vertex_attrib_pointer_with_i32(0, 3, WebGlRenderingContext::FLOAT, false, 0, 0);
@@ -257,14 +255,14 @@ impl Renderer {
         }
     }
 
-    pub fn draw_frame(&mut self, _dt: f32) {
+    pub fn draw_frame(&mut self, t: f32) {
         let gl = &self.gl;
 
         gl.bind_framebuffer(WebGlRenderingContext::FRAMEBUFFER, Some(&self.framebuffer));
         gl.viewport(0, 0, 64, 64);
         gl.clear(WebGlRenderingContext::COLOR_BUFFER_BIT);
 
-        self.triangle_renderer.draw_frame();
+        self.triangle_renderer.draw_frame(t);
 
         gl.bind_framebuffer(WebGlRenderingContext::FRAMEBUFFER, None);
         gl.viewport(0, 0, 512, 512);
