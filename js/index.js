@@ -1,4 +1,5 @@
-import * as wasm from "../pkg";
+window.js_play_sound = id => {
+	console.log( 'soundy boi', id );
+};
 
-wasm.init();
-wasm.greet();
+import("./main.js");

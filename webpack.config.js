@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = {
   mode: 'production',
   context: __dirname,
-  entry: './js/bootstrap.js',
+  entry: './js/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',

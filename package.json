@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "build": "wasm-pack build && webpack && node server.js",
+    "build": "cargo fmt && wasm-pack build && webpack && node server.js",
     "start": "node server.js"
   },
   "devDependencies": {

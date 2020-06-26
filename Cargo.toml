@@ -14,6 +14,7 @@ default = ["console_error_panic_hook"]
 wasm-bindgen = "0.2.63"
 console_error_panic_hook = { version = "0.1.6", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
+js-sys = "0.3.40"
 
 [dependencies.web-sys]
 version = "0.3.4"
@@ -21,9 +22,16 @@ features = [
   'Document',
   'Element',
   'HtmlElement',
+  'HtmlCanvasElement',
   'Node',
   'Window',
   'console',
+  'WebGlBuffer',
+  'WebGlProgram',
+  'WebGlRenderingContext',
+  'WebGlUniformLocation',
+  'WebGlShader',
+  'Performance'
 ]
 
 [profile.release]
