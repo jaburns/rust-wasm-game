@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use web_sys::{
     window, HtmlCanvasElement, WebGlBuffer, WebGlFramebuffer, WebGlProgram, WebGlRenderingContext,
@@ -6,41 +5,24 @@ use web_sys::{
 };
 
 struct BufferRenderer {
-    gl: Rc<WebGlRenderingContext>,
+    gl: WebGlRenderingContext,
     program: WebGlProgram,
     vertex_buffer: WebGlBuffer,
 }
 
 impl BufferRenderer {
-    pub fn new(gl: Rc<WebGlRenderingContext>) -> BufferRenderer {
+    pub fn new(gl: WebGlRenderingContext) -> BufferRenderer {
         let vert_shader = compile_shader(
             &gl,
             WebGlRenderingContext::VERTEX_SHADER,
-            r#"
-            attribute vec2 a_position;
-            uniform sampler2D u_tex;
-            varying vec2 v_uv;
-            void main()
-            {
-                gl_Position = vec4(a_position, 0, 1);
-                v_uv = a_position.xy*0.5 + 0.5;
-            }
-        "#,
+            include_str!("../shaders/bufferCopy.vert"),
         )
         .unwrap();
 
         let frag_shader = compile_shader(
             &gl,
             WebGlRenderingContext::FRAGMENT_SHADER,
-            r#"
-            precision highp float;
-            uniform sampler2D u_tex;
-            varying vec2 v_uv;
-            void main()
-            {
-                gl_FragColor = texture2D(u_tex, v_uv);
-            }
-        "#,
+            include_str!("../shaders/bufferCopy.frag"),
         )
         .unwrap();
 
@@ -92,40 +74,25 @@ impl BufferRenderer {
 }
 
 struct TriangleRenderer {
-    gl: Rc<WebGlRenderingContext>,
+    gl: WebGlRenderingContext,
     program: WebGlProgram,
     buffer: WebGlBuffer,
     num_verts: i32,
 }
 
 impl TriangleRenderer {
-    pub fn new(gl: Rc<WebGlRenderingContext>) -> TriangleRenderer {
+    pub fn new(gl: WebGlRenderingContext) -> TriangleRenderer {
         let vert_shader = compile_shader(
             &gl,
             WebGlRenderingContext::VERTEX_SHADER,
-            r#"
-            attribute vec4 position;
-            uniform float u_time;
-            void main() {
-                vec4 pos = position;
-                pos.y += 0.25;
-                pos.xy *= mat2(cos(u_time/971.), sin(u_time/971.), -sin(u_time/971.), cos(u_time/971.));
-                gl_Position = pos;
-            }
-        "#,
+            include_str!("../shaders/triangle.vert"),
         )
         .unwrap();
 
         let frag_shader = compile_shader(
             &gl,
             WebGlRenderingContext::FRAGMENT_SHADER,
-            r#"
-            precision highp float;
-            uniform float u_time;
-            void main() {
-                gl_FragColor = vec4(vec2(.7,.7) + vec2(.2,.2)*sin(u_time/100.), 0,1);
-            }
-        "#,
+            include_str!("../shaders/triangle.frag"),
         )
         .unwrap();
 
@@ -171,7 +138,7 @@ impl TriangleRenderer {
 }
 
 pub struct Renderer {
-    gl: Rc<WebGlRenderingContext>,
+    gl: WebGlRenderingContext,
     framebuffer: WebGlFramebuffer,
     framebuffer_tex: WebGlTexture,
     buffer_renderer: BufferRenderer,
@@ -242,12 +209,11 @@ impl Renderer {
 
         gl.clear_color(0.0, 0.0, 0.0, 1.0);
 
-        let rc_gl = Rc::new(gl);
-        let triangle_renderer = TriangleRenderer::new(rc_gl.clone());
-        let buffer_renderer = BufferRenderer::new(rc_gl.clone());
+        let triangle_renderer = TriangleRenderer::new(gl.clone());
+        let buffer_renderer = BufferRenderer::new(gl.clone());
 
         Renderer {
-            gl: rc_gl,
+            gl: gl,
             framebuffer: framebuffer,
             framebuffer_tex: framebuffer_tex,
             buffer_renderer: buffer_renderer,
